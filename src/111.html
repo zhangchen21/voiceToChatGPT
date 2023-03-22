@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" question="IE=edge">
+    <meta name="viewport" question="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+    .answer {
+        width: 490px;
+        height: 625px;
+        box-sizing: border-box;
+        padding: 20px;
+
+        border: 1px solid rgba(221, 221, 221, 0.2);
+        box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0px 2px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;      
+        
+        /* Used for btn */
+        position: relative; 
+    }
+    .title {
+        height: 24px;
+        font-weight: 400;
+        font-size: 20px;
+        line-height: 24px;
+        color: #00809D;
+    }   
+    .question{
+        width: 450px;
+        height: 150px;
+        margin-top: 15px;
+        box-sizing: border-box;
+
+        border: 1px solid #00809D;
+        border-radius: 10px; 
+
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+
+        font-family: 'Roboto';
+        font-style: normal;
+    }
+    .response {
+        width: 100%;
+        min-height: 350px;
+        margin-top: 15px;
+
+        border: 1px solid #00809D;
+        border-radius: 10px; 
+
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+
+        font-family: 'Roboto';
+        font-style: normal;
+    }
+    .btn {
+        width: 158px;
+        height: 36px;
+
+        background-color: #00809D;
+        box-shadow: 0px -1px 1px rgba(0, 0, 0, 0.1), 0px 2px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 24px; 
+
+        position: absolute;
+        top: 100%;
+        margin-top: -18px;
+        left: 50%;
+        margin-left: -79px;
+
+        color: #FFFFFF;
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 36px;
+        text-align: center;
+        
+        cursor:pointer;
+    }
+    </style>
+</head>
+<body>
+    <div class="answer">
+        <div class="title">
+            ChatGPT
+        </div>
+        <textarea class="question" style="resize:none;">
+
+        </textarea>
+        <div class="response">
+
+        </div>        
+        <div class="btn">
+            Press Space To Talk >
+        </div>             
+    </div>
+    <script>
+        const initRecognition = () => {
+            var recognition = window.webkitSpeechRecognition ? new webkitSpeechRecognition() : null;
+            recognition.lang = 'cmn-Hans-CN';
+            return recognition;        
+        }
+        const getDataFromGpt = (question) => {
+            const url = "https://api.openai.com/v1/completions";
+            const prompt = question;
+            const temperature = 0.5;
+            const maxTokens = 512;
+            const model = "text-davinci-003";
+
+            const requestOptions = {
+                method: "POST",
+                headers: {
+                    "content-Type": "application/json",
+                    Authorization: "Bearer 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",
+                },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    temperature: temperature,
+                    max_tokens: maxTokens,
+                    model: model,
+                }),
+            };
+
+            fetch(url, requestOptions)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data?.choices[0].text);
+                response.innerText = data?.choices[0].text;
+                btn.innerText = 'Press Space To Talk >';
+            })
+            .catch((error) => console.log(error));
+        }
+
+        const recognition = initRecognition();
+        const btn = document.querySelector('.btn');
+        const question = document.querySelector('.question');
+        const response = document.querySelector('.response');
+
+        if(recognition === null) window.alert("Your Brower do not support! Please change Chrome.");
+
+        recognition.onresult = (event) => {
+            const result = event.results[event.results.length - 1];
+
+            question.value = result[0].transcript;
+        };
+
+        document.addEventListener('keydown', (event) => {
+            if (event.keyCode === 32 && !event.repeat) {
+                recognition.start();
+                btn.innerText = 'Recognitizing ...';
+            }
+        });
+        document.addEventListener('keyup', (event) => {
+            if (event.keyCode === 32 && !event.repeat) {
+                recognition.stop();
+                btn.innerText = 'Press To Chat >';
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                btn.click();
+            }
+        });
+
+        btn.addEventListener('click', () => {
+            if(!question.value) {
+                window.alert("You haven't input yet.");
+                return
+            }
+            btn.innerText = 'Wait...';
+            getDataFromGpt(question.value);
+        });
+
+    </script>
+</body>
+</html>
