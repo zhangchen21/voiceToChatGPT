@@ -98,6 +98,9 @@
         </div>             
     </div>
     <script>
+        // fill this with your own;
+        const API_Key = "";
+        
         const initRecognition = () => {
             var recognition = window.webkitSpeechRecognition ? new webkitSpeechRecognition() : null;
             recognition.lang = 'cmn-Hans-CN';
@@ -114,7 +117,7 @@
                 method: "POST",
                 headers: {
                     "content-Type": "application/json",
-                    Authorization: "Bearer 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",
+                    Authorization: `Bearer ${API_Key}`,
                 },
                 body: JSON.stringify({
                     prompt: prompt,
